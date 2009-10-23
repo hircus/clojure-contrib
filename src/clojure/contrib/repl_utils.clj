@@ -9,7 +9,7 @@
 ; Utilities meant to be used interactively at the REPL
 
 (ns 
-  #^{:author "Chris Houser, Christophe Grand, Stephen Gilardi",
+  #^{:author "Chris Houser, Christophe Grand, Stephen Gilardi, Michel Salim",
      :doc "Utilities meant to be used interactively at the REPL"}
   clojure.contrib.repl-utils
   (:import (java.io File LineNumberReader InputStreamReader PushbackReader)
@@ -93,6 +93,22 @@
 
 ;; ----------------------------------------------------------------------
 ;; Examine Clojure functions (Vars, really)
+
+(defn- substring? [#^String s1 #^String s2]
+  (not (= -1 (.indexOf s2 s1))))
+
+(defn apropos
+  "Given a keyword of any stringable type, apropos returns a list of
+all definitions in all currently-loaded namespaces that contains the
+keyword in their names.
+"
+  [kw]
+  (let [kwstr (str kw)]
+    (apply concat
+	   (map (fn [ns]
+		  (filter #(substring? kwstr (str %))
+			  (keys (ns-publics ns))))
+		(all-ns)))))
 
 (defn get-source
   "Returns a string of the source code for the given symbol, if it can
